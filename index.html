@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <h1 style="margin: 10px 0 5px;">RCCG Sunday School Manual</h1>
-  <p style="margin:0; color:#555;">Official Mobile App</p>
+  <title>RCCG Sunday School Manual</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -14,13 +13,22 @@
       color: #333;
       text-align: center;
     }
+    .header {
+      margin: 40px 0 20px;
+    }
     h1 {
       color: #d32f2f; /* RCCG red-ish tone */
-      margin-bottom: 10px;
+      margin: 10px 0 5px;
+      font-size: 2.2em;
+    }
+    .subtitle {
+      margin: 0;
+      color: #555;
+      font-size: 1.1em;
     }
     .container {
       max-width: 600px;
-      margin: 40px auto;
+      margin: 0 auto;
       padding: 30px;
       background: white;
       border-radius: 12px;
@@ -42,7 +50,7 @@
       transform: translateY(-3px);
     }
     .store-btn img {
-      height: 60px; /* Standard badge height */
+      height: 60px; /* Adjust as needed */
       width: auto;
     }
     .highlight {
@@ -60,21 +68,21 @@
   </style>
 </head>
 <body>
-  <div style="margin-bottom: 25px;">
-    <img 
-      src="https://play-lh.googleusercontent.com/8jpzRowBxzFIUQuptL-RrGonbKhzyoQ-vsHTBYc6lWSDocYgN5BoPwAXWWtgHmQtWlGGDCIG573fYaDG-pA2Uw=w480-h960-rw" 
-      alt="RCCG Sunday School Manual Logo" 
-      style="max-width: 120px; height: auto; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
+  <div class="header">
+    <img
+      src="https://play-lh.googleusercontent.com/8jpzRowBxzFIUQuptL-RrGonbKhzyoQ-vsHTBYc6lWSDocYgN5BoPwAXWWtgHmQtWlGGDCIG573fYaDG-pA2Uw=w480-h960-rw"
+      alt="RCCG Sunday School Manual Logo"
+      style="width: 120px; height: auto; border-radius: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.15);"
     >
-    <!-- OR use a web-hosted RCCG logo if you prefer something wider: -->
-    <!-- <img src="https://www.rccg.org/wp-content/uploads/2023/05/rccg-logo.png" alt="RCCG" style="max-width: 180px; height: auto;"> -->
+    <h1>RCCG Sunday School Manual</h1>
+    <p class="subtitle">Official Mobile App</p>
   </div>
+
   <div class="container">
-    <h1>Welcome to RCCG Sunday School Manual</h1>
     <p>The official app for studying the Redeemed Christian Church of God Sunday School lessons — anytime, anywhere.</p>
 
     <div id="store-section" class="store-buttons">
-      <!-- Buttons will be shown/arranged by JS -->
+      <!-- Buttons populated by JS -->
     </div>
 
     <div id="highlight-area"></div>
@@ -85,19 +93,30 @@
     </p>
   </div>
 
-  <script src="config.js"></script>
-
+  <script src="config.js"></script>  <!-- Make sure this file exists in the same folder -->
   <script>
-    // Official-ish badge URLs (you can replace with your own uploaded assets)
-    const playStoreLink = appLinks.playStore.url;
-    const appStoreLink  = appLinks.appStore.url;
-    const playStoreBadge = "/images/get-it-on-google-play.svg";
-    const appStoreBadge   = "/images/download-on-app-store.svg";
+    // Fallback if config.js fails to load
+    const fallbackLinks = {
+      playStore: {
+        url: "https://play.google.com/store/apps/details?id=com.rccgsunday.schoolmanual",
+        badge: "https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+      },
+      appStore: {
+        url: "https://apps.apple.com/us/app/rccg-sunday-school-manual/id1429308319",
+        badge: "https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg"
+      }
+    };
 
-    // Simple device detection
+    // Try to use config.js values, fallback otherwise
+    const playStoreLink = (typeof appLinks !== 'undefined' && appLinks.playStore) ? appLinks.playStore.url : fallbackLinks.playStore.url;
+    const appStoreLink  = (typeof appLinks !== 'undefined' && appLinks.appStore) ? appLinks.appStore.url : fallbackLinks.appStore.url;
+    const playStoreBadge = (typeof appLinks !== 'undefined' && appLinks.playStore) ? appLinks.playStore.badge : fallbackLinks.playStore.badge;
+    const appStoreBadge   = (typeof appLinks !== 'undefined' && appLinks.appStore) ? appLinks.appStore.badge : fallbackLinks.appStore.badge;
+
+    // Device detection
     const ua = navigator.userAgent || navigator.vendor || window.opera;
-    let isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
-    let isAndroid = /android/i.test(ua);
+    const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+    const isAndroid = /android/i.test(ua);
 
     const storeSection = document.getElementById("store-section");
     const highlightArea = document.getElementById("highlight-area");
@@ -115,19 +134,16 @@
     btnIOS.className = "store-btn";
     btnIOS.innerHTML = `<img src="${appStoreBadge}" alt="Download on the App Store">`;
 
-    // Decide layout and highlight
+    // Layout logic
     if (isIOS) {
-      // iOS user → highlight App Store
       highlightArea.innerHTML = `<div class="highlight"><strong>You're on iOS → Recommended:</strong></div>`;
       highlightArea.appendChild(btnIOS);
       storeSection.appendChild(btnAndroid);
     } else if (isAndroid) {
-      // Android user → highlight Play Store
       highlightArea.innerHTML = `<div class="highlight"><strong>You're on Android → Recommended:</strong></div>`;
       highlightArea.appendChild(btnAndroid);
       storeSection.appendChild(btnIOS);
     } else {
-      // Desktop / other → show both equally
       storeSection.appendChild(btnIOS);
       storeSection.appendChild(btnAndroid);
     }

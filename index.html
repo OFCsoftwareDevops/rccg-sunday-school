@@ -89,7 +89,7 @@
 
     <p class="note">
       More information about the app and developer coming soon.<br>
-      Currently available on both platforms.
+      Currently available on google play.
     </p>
   </div>
 
@@ -101,18 +101,18 @@
         url: "https://play.google.com/store/apps/details?id=com.rccgsunday.schoolmanual",
         badge: "images/get-it-on-google-play.svg"
       },
-      appStore: {
-        url: "https://apps.apple.com/us/app/rccg-sunday-school-manual/id1429308319",
-        badge: "images/download-on-app-store.svg"
-      }
+      //appStore: {
+      //  url: "https://apps.apple.com/us/app/rccg-sunday-school-manual/id1429308319",
+      //  badge: "images/download-on-app-store.svg"
+     // }
     };
 
     // Prefer config → fallback to local
     const playStoreLink = (typeof appLinks !== 'undefined' && appLinks.playStore?.url) ? appLinks.playStore.url : fallbackLinks.playStore.url;
-    const appStoreLink  = (typeof appLinks !== 'undefined' && appLinks.appStore?.url)  ? appLinks.appStore.url  : fallbackLinks.appStore.url;
+    //const appStoreLink  = (typeof appLinks !== 'undefined' && appLinks.appStore?.url)  ? appLinks.appStore.url  : fallbackLinks.appStore.url;
     
     const playStoreBadge = (typeof appLinks !== 'undefined' && appLinks.playStore?.badge) ? appLinks.playStore.badge : fallbackLinks.playStore.badge;
-    const appStoreBadge  = (typeof appLinks !== 'undefined' && appLinks.appStore?.badge)  ? appLinks.appStore.badge  : fallbackLinks.appStore.badge;
+    //const appStoreBadge  = (typeof appLinks !== 'undefined' && appLinks.appStore?.badge)  ? appLinks.appStore.badge  : fallbackLinks.appStore.badge;
 
     // Device detection
     const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -135,19 +135,6 @@
     btnIOS.className = "store-btn";
     btnIOS.innerHTML = `<img src="${appStoreBadge}" alt="Download on the App Store">`;
 
-    // Layout logic
-    if (isIOS) {
-      highlightArea.innerHTML = `<div class="highlight"><strong>You're on iOS → Recommended:</strong></div>`;
-      highlightArea.appendChild(btnIOS);
-      storeSection.appendChild(btnAndroid);
-    } else if (isAndroid) {
-      highlightArea.innerHTML = `<div class="highlight"><strong>You're on Android → Recommended:</strong></div>`;
-      highlightArea.appendChild(btnAndroid);
-      storeSection.appendChild(btnIOS);
-    } else {
-      storeSection.appendChild(btnIOS);
-      storeSection.appendChild(btnAndroid);
-    }
   </script>
 </body>
 </html>

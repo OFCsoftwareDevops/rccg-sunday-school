@@ -107,11 +107,12 @@
       }
     };
 
-    // Try to use config.js values, fallback otherwise
-    const playStoreLink = (typeof appLinks !== 'undefined' && appLinks.playStore) ? appLinks.playStore.url : fallbackLinks.playStore.url;
-    const appStoreLink  = (typeof appLinks !== 'undefined' && appLinks.appStore) ? appLinks.appStore.url : fallbackLinks.appStore.url;
-    const playStoreBadge = (typeof appLinks !== 'undefined' && appLinks.playStore) ? appLinks.playStore.badge : fallbackLinks.playStore.badge;
-    const appStoreBadge   = (typeof appLinks !== 'undefined' && appLinks.appStore) ? appLinks.appStore.badge : fallbackLinks.appStore.badge;
+    // Prefer config → fallback to local
+    const playStoreLink = (typeof appLinks !== 'undefined' && appLinks.playStore?.url) ? appLinks.playStore.url : fallbackLinks.playStore.url;
+    const appStoreLink  = (typeof appLinks !== 'undefined' && appLinks.appStore?.url)  ? appLinks.appStore.url  : fallbackLinks.appStore.url;
+    
+    const playStoreBadge = (typeof appLinks !== 'undefined' && appLinks.playStore?.badge) ? appLinks.playStore.badge : fallbackLinks.playStore.badge;
+    const appStoreBadge  = (typeof appLinks !== 'undefined' && appLinks.appStore?.badge)  ? appLinks.appStore.badge  : fallbackLinks.appStore.badge;
 
     // Device detection
     const ua = navigator.userAgent || navigator.vendor || window.opera;

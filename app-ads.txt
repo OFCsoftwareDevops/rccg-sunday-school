@@ -1,4 +1,1 @@
-# Authorized sellers for RCCG Sunday School app - Updated Feb 2026
-OWNERDOMAIN=ofcsoftwaredevops.github.io/rccg-sunday-school
-
 google.com, pub-9863376634060421, DIRECT, f08c47fec0942fa0

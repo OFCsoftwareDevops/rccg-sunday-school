@@ -136,6 +136,20 @@
     btnIOS.className = "store-btn";
     btnIOS.innerHTML = `<img src="${appStoreBadge}" alt="Download on the App Store">`;
 
+    // Layout logic
+    if (isIOS) {
+      //highlightArea.innerHTML = `<div class="highlight"><strong>You're on iOS → Recommended:</strong></div>`;
+      //highlightArea.appendChild(btnIOS);
+      storeSection.appendChild(btnAndroid);
+    } else if (isAndroid) {
+      //highlightArea.innerHTML = `<div class="highlight"><strong>You're on Android → Recommended:</strong></div>`;
+      highlightArea.appendChild(btnAndroid);
+      //storeSection.appendChild(btnIOS);
+    } else {
+      //storeSection.appendChild(btnIOS);
+      storeSection.appendChild(btnAndroid);
+    }
+
   </script>
 </body>
 </html>

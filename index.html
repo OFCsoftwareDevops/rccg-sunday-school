@@ -101,19 +101,19 @@
       playStore: {
         url: "https://play.google.com/store/apps/details?id=com.rccgsunday.schoolmanual",
         badge: "images/get-it-on-google-play.svg"
-      //},
-      //appStore: {
-      //  url: "https://apps.apple.com/us/app/rccg-sunday-school-manual/id1429308319",
-      //  badge: "images/download-on-app-store.svg"
+      },
+      appStore: {
+        url: "https://apps.apple.com/us/app/rccg-sunday-school-manual/id1429308319",
+        badge: "images/download-on-app-store.svg"
       }
     };
 
     // Prefer config → fallback to local
     const playStoreLink = (typeof appLinks !== 'undefined' && appLinks.playStore?.url) ? appLinks.playStore.url : fallbackLinks.playStore.url;
-    //const appStoreLink  = (typeof appLinks !== 'undefined' && appLinks.appStore?.url)  ? appLinks.appStore.url  : fallbackLinks.appStore.url;
+    const appStoreLink  = (typeof appLinks !== 'undefined' && appLinks.appStore?.url)  ? appLinks.appStore.url  : fallbackLinks.appStore.url;
     
     const playStoreBadge = (typeof appLinks !== 'undefined' && appLinks.playStore?.badge) ? appLinks.playStore.badge : fallbackLinks.playStore.badge;
-    //const appStoreBadge  = (typeof appLinks !== 'undefined' && appLinks.appStore?.badge)  ? appLinks.appStore.badge  : fallbackLinks.appStore.badge;
+    const appStoreBadge  = (typeof appLinks !== 'undefined' && appLinks.appStore?.badge)  ? appLinks.appStore.badge  : fallbackLinks.appStore.badge;
 
     // Device detection
     const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -130,11 +130,11 @@
     btnAndroid.className = "store-btn";
     btnAndroid.innerHTML = `<img src="${playStoreBadge}" alt="Get it on Google Play">`;
 
-    const btnIOS = document.createElement("a");
-    btnIOS.href = appStoreLink;
-    btnIOS.target = "_blank";
-    btnIOS.className = "store-btn";
-    btnIOS.innerHTML = `<img src="${appStoreBadge}" alt="Download on the App Store">`;
+    //const btnIOS = document.createElement("a");
+    //btnIOS.href = appStoreLink;
+    //btnIOS.target = "_blank";
+    //btnIOS.className = "store-btn";
+    //btnIOS.innerHTML = `<img src="${appStoreBadge}" alt="Download on the App Store">`;
 
     // Layout logic
     if (isIOS) {

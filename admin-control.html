@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Church Approval Admin</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+    button { margin: 8px 4px; padding: 10px 16px; font-size: 16px; cursor: pointer; }
+    pre { background: #f4f4f4; padding: 12px; overflow: auto; border-radius: 6px; white-space: pre-wrap; }
+    input { padding: 10px; margin: 8px 0; width: 100%; box-sizing: border-box; }
+    #authStatus { color: green; font-weight: bold; }
+    #googleSignInBtn { background: #4285F4; color: white; border: none; }
+  </style>
+</head>
+<body>
+  <h1>Church Requests Admin</h1>
+
+  <h3>Sign In</h3>
+  <button id="googleSignInBtn" onclick="signInWithGoogle()">Sign in with Google</button>
+  <p id="authStatus"></p>
+
+  <hr>
+
+  <button onclick="listPending()">1. List Pending Requests</button>
+
+  <h3>Single Request</h3>
+  <input type="text" id="reqId" placeholder="Enter Request ID (from list above)">
+  <button onclick="approve()">Approve</button>
+  <button onclick="reject()">Reject</button>
+
+  <h3>Batch Actions</h3>
+  <button onclick="batchApprove()">Batch Approve All Pending</button>
+  <button onclick="batchReject()">Batch Reject All Pending</button>
+
+  <h3>Maintenance</h3>
+  <button onclick="cleanup()">Cleanup Processed (>7 days)</button>
+  <button onclick="backfill()">Backfill Used Codes</button>
+
+  <pre id="output">Results appear here... Sign in first.</pre>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+
+  <script>
+    // === Replace with YOUR Firebase config ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyDSB9-HObJR7NcMJStqE8UnT-4L6J7_tEw",           // ← from Firebase Console > Project Settings > Your apps > Web app
+      authDomain: "sundayschoolmanual-e2951.firebaseapp.com",
+      projectId: "sundayschoolmanual-e2951",
+      storageBucket: "sundayschoolmanual-e2951.firebasestorage.app",
+      messagingSenderId: "805653977002",
+      appId: "1:805653977002:web:2dd44b21dc33150e15bdd3",
+      measurementId: "G-MEWL8ZD198"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    let idToken = null;
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        user.getIdToken().then(token => {
+          idToken = token;
+          document.getElementById('authStatus').textContent = 'Signed in as ' + user.email;
+          document.getElementById('output').textContent = 'Ready! You can now use the buttons.';
+        });
+      } else {
+        idToken = null;
+        document.getElementById('authStatus').textContent = 'Not signed in';
+        document.getElementById('output').textContent = 'Sign in to continue...';
+      }
+    });
+
+// Handle redirect result on every page load
+    firebase.auth().getRedirectResult()
+      .then(result => {
+        if (result && result.user) {
+          console.log('Signed in via redirect:', result.user.email);
+          // Optional: show success
+        }
+      })
+      .catch(error => {
+        console.error('Redirect error:', error);
+        alert('Sign-in error: ' + error.message);
+      });
+
+    // Google Sign-In with Redirect
+    function signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      // Optional: add scopes if needed later
+      // provider.addScope('https://www.googleapis.com/auth/userinfo.profile');
+
+      firebase.auth().signInWithRedirect(provider);
+    }
+
+    // Call any function with auth header
+    async function callFunction(endpoint, method = 'GET', body = null) {
+      if (!idToken) {
+        alert('Please sign in with Google first');
+        return;
+      }
+
+      const url = `https://us-central1-sundayschoolmanual-e2951.cloudfunctions.net/${endpoint}`;
+      const options = {
+        method,
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json'
+        }
+      };
+
+      if (body) options.body = JSON.stringify(body);
+
+      try {
+        const res = await fetch(url, options);
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('output').textContent = 'Error: ' + err.message;
+        console.error(err);
+      }
+    }
+
+    // Button handlers
+    function listPending()     { callFunction('listPending'); }
+    function approve()         { callFunction('approve', 'POST', { id: document.getElementById('reqId').value }); }
+    function reject()          { callFunction('reject',  'POST', { id: document.getElementById('reqId').value }); }
+    function batchApprove()    { callFunction('batchApprove', 'POST'); }
+    function batchReject()     { callFunction('batchReject', 'POST'); }
+    function cleanup()         { callFunction('cleanup', 'POST'); }
+    function backfill()        { callFunction('backfill', 'POST'); }
+  </script>
+</body>
+</html>

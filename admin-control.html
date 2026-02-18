@@ -59,13 +59,15 @@
 
     let idToken = null;
 
+    // Persistent state listener with logging
     auth.onAuthStateChanged(user => {
+      console.log('onAuthStateChanged fired. User:', user ? user.email : 'null');
       if (user) {
         user.getIdToken().then(token => {
           idToken = token;
           document.getElementById('authStatus').textContent = 'Signed in as ' + user.email;
-          document.getElementById('output').textContent = 'Ready! You can now use the buttons.';
-        });
+          document.getElementById('output').textContent = 'Ready! Click buttons to manage requests.';
+        }).catch(err => console.error('Token error:', err));
       } else {
         idToken = null;
         document.getElementById('authStatus').textContent = 'Not signed in';
@@ -73,17 +75,19 @@
       }
     });
 
-// Handle redirect result on every page load
+    // Force check on load and log everything
     firebase.auth().getRedirectResult()
       .then(result => {
         if (result && result.user) {
-          console.log('Signed in via redirect:', result.user.email);
-          // Optional: show success
+          console.log('Redirect success! User:', result.user.email, result.user.uid);
+          document.getElementById('output').textContent = 'Redirect success! Signed in as ' + result.user.email;
+        } else {
+          console.log('No redirect result (normal if not after sign-in)');
         }
       })
       .catch(error => {
-        console.error('Redirect error:', error);
-        alert('Sign-in error: ' + error.message);
+        console.error('Redirect error:', error.code, error.message);
+        alert('Redirect error: ' + error.message);
       });
 
     // Google Sign-In with Redirect

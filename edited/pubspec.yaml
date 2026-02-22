@@ -1,0 +1,108 @@
+name: rccg_sunday_school
+description: "Fully integrated sunday schhol environment for students and teachers, with a fully functioning assignments and grading system."
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+version: 1.0.4+18
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+# Dependencies specify other packages that your package needs in order to work.
+dependencies:
+  flutter:
+    sdk: flutter
+  device_info_plus: ^12.3.0
+  firebase_core: ^4.3.0
+  firebase_analytics: ^12.1.0
+  firebase_auth: ^6.1.3
+  cloud_firestore: ^6.1.1
+  cloud_functions: ^6.0.5
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^7.0.1
+  crypto: ^3.0.7
+  shared_preferences: ^2.3.2
+  connectivity_plus: ^7.0.0
+  firebase_messaging: ^16.1.0
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
+  share_plus: ^12.0.1
+  path_provider: ^2.0.14
+  provider: ^6.1.2
+  http: ^1.2.1
+  intl_phone_field: ^3.2.0
+  url_launcher: ^6.1.7
+  google_fonts: ^6.2.1
+  google_mobile_ads: ^7.0.0
+  # shorebird_code_push: ^2.0.5
+  flutter_local_notifications: ^19.5.0
+  flutter_timezone: ^5.0.1
+  permission_handler: ^12.0.1
+  timezone: ^0.10.1
+  # background_fetch: ^1.5.0
+  # workmanager: ^0.6.0
+  pdf: ^3.11.1
+  flutter_screenutil: ^5.9.3
+  flutter_rating_bar: ^4.0.1
+  flutter_riverpod: ^3.2.1
+  riverpod: ^3.2.1
+  purchases_flutter: ^8.0.0
+  cupertino_icons: ^1.0.8
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  app_links: ^7.0.0
+  go_router: ^14.8.1
+  cached_network_image: ^3.4.0
+  rxdart: ^0.27.7
+  audioplayers: ^5.2.0
+  text_scroll: ^0.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.13
+  
+
+# The following section is specific to Flutter packages.
+flutter:
+  generate: true
+  uses-material-design: true
+
+  assets:
+    - shorebird.yaml
+    - assets/images/rccg_logo.png
+    - assets/images/rccg_jhfan_share_image.png
+    - assets/images/rccg_sunday_school_manual_preview.png
+    - assets/images/google_logo.png
+    - assets/images/apple_logo.png
+    - assets/images/anonymous_user.png
+    - assets/sounds/click.mp3
+    - assets/sounds/click2.mp3
+    - assets/sounds/click3.mp3
+    - assets/sounds/click4.mp3
+    - assets/sounds/success.mp3
+    - assets/bible/kjv/
+    - assets/bible/bbe/
+    - assets/bible/web/
+    - assets/bible/asv/
+    - assets/bible/ylt/
+    - assets/bible/lsg/
+
+flutter_launcher_icons:
+  # android: true
+  ios: true
+  image_path: "assets/images/app_logo.png"
+  remove_alpha_ios: true
+
+l10n:
+  arb-dir: lib/l10n
+  template-arb-file: app_en.arb
+  output-dir: lib/generated
+
+dependency_overrides:
+  path_provider_android: 2.2.20
+  analyzer: ^6.4.1

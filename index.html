@@ -105,7 +105,6 @@
 
     <p class="note">
       <!--More information about the app and developer coming soon.<br>-->
-      Coming soon to iOS.
     </p>
   </div>
 
@@ -118,7 +117,7 @@
         badge: "images/get-it-on-google-play.svg"
       },
       appStore: {
-        url: "https://apps.apple.com/us/app/rccg-sunday-school-manual/id1429308319",
+        url: "https://apps.apple.com/app/rccg-sunday-school-manual/id6759505007",
         badge: "images/download-on-app-store.svg"
       }
     };
@@ -145,23 +144,23 @@
     btnAndroid.className = "store-btn";
     btnAndroid.innerHTML = `<img src="${playStoreBadge}" alt="Get it on Google Play">`;
 
-    //const btnIOS = document.createElement("a");
-    //btnIOS.href = appStoreLink;
-    //btnIOS.target = "_blank";
-    //btnIOS.className = "store-btn";
-    //btnIOS.innerHTML = `<img src="${appStoreBadge}" alt="Download on the App Store">`;
+    const btnIOS = document.createElement("a");
+    btnIOS.href = appStoreLink;
+    btnIOS.target = "_blank";
+    btnIOS.className = "store-btn";
+    btnIOS.innerHTML = `<img src="${appStoreBadge}" alt="Download on the App Store">`;
 
     // Layout logic
     if (isIOS) {
       //highlightArea.innerHTML = `<div class="highlight"><strong>You're on iOS → Recommended:</strong></div>`;
-      //highlightArea.appendChild(btnIOS);
+      highlightArea.appendChild(btnIOS);
       storeSection.appendChild(btnAndroid);
     } else if (isAndroid) {
       //highlightArea.innerHTML = `<div class="highlight"><strong>You're on Android → Recommended:</strong></div>`;
       highlightArea.appendChild(btnAndroid);
-      //storeSection.appendChild(btnIOS);
+      storeSection.appendChild(btnIOS);
     } else {
-      //storeSection.appendChild(btnIOS);
+      storeSection.appendChild(btnIOS);
       storeSection.appendChild(btnAndroid);
     }
 

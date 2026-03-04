@@ -5,7 +5,7 @@ const appLinks = {
     badge: null
   },
   appStore: {
-    url: "https://apps.apple.com/app/idYOUR_APP_ID",
+    url: "apps.apple.com/app/rccg-sunday-school-manual/id6759505007",
     badge: null
   }
 };

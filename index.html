@@ -67,6 +67,44 @@
       background-color: #ffebee;
       margin: 20px 0;
     }
+
+    .legal-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 40px 0;
+      max-width: 500px;             /* Optional: cap total width */
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .legal-btn {
+      flex: 1;                      /* Grow equally */
+      max-width: 240px;             /* Or set this to force same width */
+      display: inline-block;
+      padding: 12px 24px;           /* More comfortable tap area */
+      background-color: #ffebee;
+      border: 2px solid #d32f2f;    /* Slightly thicker for emphasis */
+      border-radius: 8px;
+      color: #d32f2f;
+      text-decoration: none;
+      font-weight: 600;             /* Bolder text */
+      font-size: 1rem;
+      text-align: center;
+      transition: all 0.2s ease;    /* Smooth hover */
+      box-shadow: 0 2px 6px rgba(211, 47, 47, 0.1); /* Subtle shadow for depth */
+    }
+    
+    .legal-btn:hover {
+      background-color: #ffcdd2;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
+    }
+    
+    .legal-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 4px rgba(211, 47, 47, 0.15);
+    }
     .note {
       font-size: 0.9em;
       color: #555;
@@ -94,17 +132,13 @@
 
     <div id="highlight-area"></div>
 
-    <div style="margin: 40px 0; text-align: center;">
-      <a href="privacy.html" class="store-btn" style="margin: 10px; padding: 10px 20px; background: #ffebee; border: 1px solid #d32f2f; border-radius: 8px; color: #d32f2f; text-decoration: none; font-weight: 500;">
-        Privacy Policy
-      </a>
-      <a href="deletion-request.html" class="store-btn" style="margin: 10px; padding: 10px 20px; background: #ffebee; border: 1px solid #d32f2f; border-radius: 8px; color: #d32f2f; text-decoration: none; font-weight: 500;">
-        Request Data Deletion
-      </a>
+    <div class="legal-buttons">
+      <a href="privacy.html" class="legal-btn">Privacy Policy</a>
+      <a href="deletion-request.html" class="legal-btn">Request Data Deletion</a>
     </div>
 
     <p class="note">
-      iOS coming to Europe soon.<br>
+      <!--iOS coming to Europe soon.<br>-->
       <!--More information about the app and developer coming soon.<br>-->
     </p>
   </div>
@@ -153,11 +187,9 @@
 
     // Layout logic
     if (isIOS) {
-      //highlightArea.innerHTML = `<div class="highlight"><strong>You're on iOS → Recommended:</strong></div>`;
       highlightArea.appendChild(btnIOS);
       storeSection.appendChild(btnAndroid);
     } else if (isAndroid) {
-      //highlightArea.innerHTML = `<div class="highlight"><strong>You're on Android → Recommended:</strong></div>`;
       highlightArea.appendChild(btnAndroid);
       storeSection.appendChild(btnIOS);
     } else {

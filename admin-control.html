@@ -57,6 +57,7 @@
     const auth = getAuth(app);
     
     let idToken = null;
+    let loginInProgress = false; // ✅ FIX 1 (missing variable)
     
     /* =========================
        AUTH STATE LISTENER
@@ -64,7 +65,7 @@
     onAuthStateChanged(auth, async (user) => {
       
       // 🔄 ALWAYS reset UI lock
-      loginInProgress = false; // ✅ reset here
+      loginInProgress = false;
       
       const btn = document.getElementById("googleSignInBtn");
       if (btn) btn.disabled = false;
@@ -110,7 +111,8 @@
        GOOGLE SIGN-IN
     ========================= */
     window.signInWithGoogle = function () {
-      if (loginInProgress) return;
+      
+      if (loginInProgress) return; // ✅ prevents double calls
 
       loginInProgress = true;
       

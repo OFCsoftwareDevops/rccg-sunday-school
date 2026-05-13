@@ -55,6 +55,7 @@
     const auth = getAuth(app);
     
     let idToken = null;
+    let loginInProgress = false;
     
     /* =========================
        AUTH STATE LISTENER
@@ -98,6 +99,10 @@
        GOOGLE SIGN-IN
     ========================= */
     window.signInWithGoogle = function () {
+      if (loginInProgress) return;
+
+      loginInProgress = true;
+
       const provider = new GoogleAuthProvider();
       signInWithRedirect(auth, provider);
     };
@@ -171,93 +176,6 @@
     
     window.backfill = () =>
       callFunction('backfill', 'POST');
-    /*/ === Replace with YOUR Firebase config ===
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    let idToken = null;
-
-    // Persistent state listener with logging
-    auth.onAuthStateChanged(user => {
-      console.log('onAuthStateChanged fired. User:', user ? user.email : 'null');
-      if (user) {
-        user.getIdToken().then(token => {
-          idToken = token;
-          document.getElementById('authStatus').textContent = 'Signed in as ' + user.email;
-          document.getElementById('output').textContent = 'Ready! Click buttons to manage requests.';
-        }).catch(err => console.error('Token error:', err));
-      } else {
-        idToken = null;
-        document.getElementById('authStatus').textContent = 'Not signed in';
-        document.getElementById('output').textContent = 'Sign in to continue...';
-      }
-    });
-
-    // Force check on load and log everything
-    firebase.auth().getRedirectResult()
-      .then(result => {
-        if (result && result.user) {
-          console.log('Redirect success! User:', result.user.email, result.user.uid);
-          document.getElementById('output').textContent = 'Redirect success! Signed in as ' + result.user.email;
-        } else {
-          console.log('No redirect result (normal if not after sign-in)');
-        }
-      })
-      .catch(error => {
-        console.error('Redirect error:', error.code, error.message);
-        alert('Redirect error: ' + error.message);
-      });
-
-    // Google Sign-In with Redirect
-    function signInWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      // Optional: add scopes if needed later
-      // provider.addScope('https://www.googleapis.com/auth/userinfo.profile');
-
-      firebase.auth().signInWithRedirect(provider);
-    }
-
-    // Call any function with auth header
-    async function callFunction(endpoint, method = 'GET', body = null) {
-      if (!idToken) {
-        alert('Please sign in with Google first');
-        return;
-      }
-
-      const url = `https://us-central1-sundayschoolmanual-e2951.cloudfunctions.net/${endpoint}`;
-      const options = {
-        method,
-        headers: {
-          'Authorization': `Bearer ${idToken}`,
-          'Content-Type': 'application/json'
-        }
-      };
-
-      if (body) options.body = JSON.stringify(body);
-
-      try {
-        const res = await fetch(url, options);
-        if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.error || `HTTP ${res.status}`);
-        }
-        const data = await res.json();
-        document.getElementById('output').textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        document.getElementById('output').textContent = 'Error: ' + err.message;
-        console.error(err);
-      }
-    }
-
-    // Button handlers
-    function listPending()     { callFunction('listPending'); }
-    function approve()         { callFunction('approve', 'POST', { id: document.getElementById('reqId').value }); }
-    function reject()          { callFunction('reject',  'POST', { id: document.getElementById('reqId').value }); }
-    function batchApprove()    { callFunction('batchApprove', 'POST'); }
-    function batchReject()     { callFunction('batchReject', 'POST'); }
-    function cleanup()         { callFunction('cleanup', 'POST'); }
-    function backfill()        { callFunction('backfill', 'POST'); }*/
   </script>
 </body>
 </html>

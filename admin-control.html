@@ -39,11 +39,139 @@
 
   <pre id="output">Results appear here... Sign in first.</pre>
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-
   <script>
-    // === Replace with YOUR Firebase config ===
+    import firebaseConfig from './config.js';
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithRedirect,
+      getRedirectResult,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    let idToken = null;
+    
+    /* =========================
+       AUTH STATE LISTENER
+    ========================= */
+    onAuthStateChanged(auth, async (user) => {
+      console.log('Auth state:', user ? user.email : 'null');
+    
+      if (user) {
+        idToken = await user.getIdToken();
+    
+        document.getElementById('authStatus').textContent =
+          'Signed in as ' + user.email;
+    
+        document.getElementById('output').textContent =
+          'Ready! Click buttons to manage requests.';
+      } else {
+        idToken = null;
+    
+        document.getElementById('authStatus').textContent =
+          'Not signed in';
+    
+        document.getElementById('output').textContent =
+          'Sign in to continue...';
+      }
+    });
+    
+    /* =========================
+       REDIRECT RESULT CHECK
+    ========================= */
+    try {
+      const result = await getRedirectResult(auth);
+    
+      if (result?.user) {
+        console.log('Redirect success:', result.user.email);
+      }
+    } catch (err) {
+      console.error('Redirect error:', err);
+    }
+    
+    /* =========================
+       GOOGLE SIGN-IN
+    ========================= */
+    window.signInWithGoogle = function () {
+      const provider = new GoogleAuthProvider();
+      signInWithRedirect(auth, provider);
+    };
+    
+    /* =========================
+       CALL CLOUD FUNCTIONS
+    ========================= */
+    window.callFunction = async function (endpoint, method = 'GET', body = null) {
+    
+      if (!idToken) {
+        alert('Please sign in first');
+        return;
+      }
+    
+      const url = `https://us-central1-sundayschoolmanual-e2951.cloudfunctions.net/${endpoint}`;
+    
+      const options = {
+        method,
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json'
+        }
+      };
+    
+      if (body) options.body = JSON.stringify(body);
+    
+      try {
+        const res = await fetch(url, options);
+    
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || `HTTP ${res.status}`);
+        }
+    
+        const data = await res.json();
+    
+        document.getElementById('output').textContent =
+          JSON.stringify(data, null, 2);
+    
+      } catch (err) {
+        console.error(err);
+        document.getElementById('output').textContent =
+          'Error: ' + err.message;
+      }
+    };
+    
+    /* =========================
+       BUTTON FUNCTIONS
+    ========================= */
+    window.listPending = () =>
+      callFunction('listPending');
+    
+    window.approve = () =>
+      callFunction('approve', 'POST', {
+        id: document.getElementById('reqId').value
+      });
+    
+    window.reject = () =>
+      callFunction('reject', 'POST', {
+        id: document.getElementById('reqId').value
+      });
+    
+    window.batchApprove = () =>
+      callFunction('batchApprove', 'POST');
+    
+    window.batchReject = () =>
+      callFunction('batchReject', 'POST');
+    
+    window.cleanup = () =>
+      callFunction('cleanup', 'POST');
+    
+    window.backfill = () =>
+      callFunction('backfill', 'POST');
+    /*/ === Replace with YOUR Firebase config ===
     const firebaseConfig = {
       apiKey: "AIzaSyDSB9-HObJR7NcMJStqE8UnT-4L6J7_tEw",           // ← from Firebase Console > Project Settings > Your apps > Web app
       authDomain: "sundayschoolmanual-e2951.firebaseapp.com",
@@ -138,7 +266,7 @@
     function batchApprove()    { callFunction('batchApprove', 'POST'); }
     function batchReject()     { callFunction('batchReject', 'POST'); }
     function cleanup()         { callFunction('cleanup', 'POST'); }
-    function backfill()        { callFunction('backfill', 'POST'); }
+    function backfill()        { callFunction('backfill', 'POST'); }*/
   </script>
 </body>
 </html>

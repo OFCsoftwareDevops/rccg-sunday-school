@@ -172,15 +172,6 @@
     window.backfill = () =>
       callFunction('backfill', 'POST');
     /*/ === Replace with YOUR Firebase config ===
-    const firebaseConfig = {
-      apiKey: "AIzaSyDSB9-HObJR7NcMJStqE8UnT-4L6J7_tEw",           // ← from Firebase Console > Project Settings > Your apps > Web app
-      authDomain: "sundayschoolmanual-e2951.firebaseapp.com",
-      projectId: "sundayschoolmanual-e2951",
-      storageBucket: "sundayschoolmanual-e2951.firebasestorage.app",
-      messagingSenderId: "805653977002",
-      appId: "1:805653977002:web:2dd44b21dc33150e15bdd3",
-      measurementId: "G-MEWL8ZD198"
-    };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();

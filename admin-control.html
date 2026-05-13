@@ -62,8 +62,12 @@
        AUTH STATE LISTENER
     ========================= */
     onAuthStateChanged(auth, async (user) => {
-      let loginInProgress = false; // ✅ reset here
-      document.getElementById("googleSignInBtn").disabled = false;
+      
+      // 🔄 ALWAYS reset UI lock
+      loginInProgress = false; // ✅ reset here
+      
+      const btn = document.getElementById("googleSignInBtn");
+      if (btn) btn.disabled = false;
       
       console.log('Auth state:', user ? user.email : 'null');
     
@@ -95,7 +99,12 @@
           console.log('Redirect success:', result.user.email);
         }
       })
-      .catch(console.error);
+      .catch((error) => {
+        // 🔥 ignore harmless Firebase redirect noise errors
+        if (error.code !== "auth/cancelled-popup-request") {
+          console.error("Redirect error:", error);
+        }
+      });
     
     /* =========================
        GOOGLE SIGN-IN
@@ -104,7 +113,16 @@
       if (loginInProgress) return;
 
       loginInProgress = true;
-      document.getElementById("googleSignInBtn").disabled = true;
+      
+      // 🔒 disable button immediately
+      const btn = document.getElementById("googleSignInBtn");
+      if (btn) btn.disabled = true;
+    
+      // 🔥 safety timeout (prevents stuck state if redirect fails)
+      setTimeout(() => {
+        loginInProgress = false;
+        if (btn) btn.disabled = false;
+      }, 8000);
 
       const provider = new GoogleAuthProvider();
       signInWithRedirect(auth, provider);

@@ -10,7 +10,7 @@
       max-width: 500px;
       margin: 40px auto;
       padding: 20px;
-      line-height: 1.5;
+      line-height: 1.6;
       text-align: center;
     }
     h1 { font-size: 1.8rem; margin-bottom: 1rem; }
@@ -36,26 +36,17 @@
 
   <!-- Firebase SDK v10+ (modular, latest as of 2026) -->
   <script type="module">
+    import firebaseConfig from './config.js';
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { 
-      getAuth, 
-      GoogleAuthProvider, 
-      signInWithPopup, 
-      onAuthStateChanged, 
-      signOut 
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged,
+      signOut
     } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
-
-    // ← REPLACE WITH YOUR REAL CONFIG from Firebase Console > Project Settings
-    const firebaseConfig = {
-      apiKey: "AIzaSyDSB9-HObJR7NcMJStqE8UnT-4L6J7_tEw",
-      authDomain: "sundayschoolmanual-e2951.firebaseapp.com",
-      projectId: "sundayschoolmanual-e2951",
-      storageBucket: "sundayschoolmanual-e2951.firebasestorage.app",
-      messagingSenderId: "805653977002",
-      appId: "1:805653977002:web:2dd44b21dc33150e15bdd3",
-      measurementId: "G-MEWL8ZD198"
-    };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -73,67 +64,70 @@
     });
 
     function updateUI() {
-      const signInBtn = document.getElementById("googleSignIn");
-      const deleteBtn = document.getElementById("requestDeletion");
-      const signOutBtn = document.getElementById("signOut");
-      const userInfo = document.getElementById("userInfo");
-      const message = document.getElementById("message");
-
-      if (currentUser) {
-        signInBtn.style.display = "none";
-        deleteBtn.style.display = "inline-block";
-        signOutBtn.style.display = "inline-block";
-        userInfo.textContent = `Logged in as: ${currentUser.displayName || currentUser.email}`;
-        message.textContent = "";
-      } else {
-        signInBtn.style.display = "inline-block";
-        deleteBtn.style.display = "none";
-        signOutBtn.style.display = "none";
-        userInfo.textContent = "";
-        message.textContent = "";
-      }
+      document.getElementById("googleSignIn").style.display = currentUser ? "none" : "inline-block";
+      document.getElementById("requestDeletion").style.display = currentUser ? "inline-block" : "none";
+      document.getElementById("signOut").style.display = currentUser ? "inline-block" : "none";
+      
+      document.getElementById("userInfo").textContent = currentUser 
+        ? `Logged in as: ${currentUser.displayName || currentUser.email}` 
+        : "";
     }
-
-    // Google Sign-In (Popup)
-    document.getElementById("googleSignIn").addEventListener("click", async () => {
-      try {
-        const result = await signInWithPopup(auth, provider);
-        // Optional: you could create/update user doc here if needed
-        showMessage(`Welcome, ${result.user.displayName}! Now you can request deletion.`, "success");
-      } catch (error) {
-        showMessage(error.message || "Sign-in failed. Try again.", "error");
-        console.error(error);
-      }
-    });
-
-    // Request Deletion
-    document.getElementById("requestDeletion").addEventListener("click", async () => {
-      const btn = document.getElementById("requestDeletion");
-      btn.disabled = true;
-      showMessage("Processing...", "");
-
-      try {
-        const result = await requestDeletionFn();
-        showMessage(result.data.message || "Deletion scheduled successfully (30 days).", "success");
-      } catch (error) {
-        showMessage(error.message || "Error scheduling deletion.", "error");
-        console.error(error);
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    // Sign Out
-    document.getElementById("signOut").addEventListener("click", async () => {
-      await signOut(auth);
-      showMessage("Signed out successfully.", "success");
-    });
 
     function showMessage(text, type = "") {
       const el = document.getElementById("message");
       el.textContent = text;
       el.className = type;
     }
+
+    // ====================== SIGN IN ======================
+    document.getElementById("googleSignIn").addEventListener("click", async () => {
+      try {
+        showMessage("Connecting to Google...", "");
+        
+        provider.setCustomParameters({ prompt: 'select_account' });
+        
+        const result = await signInWithPopup(auth, provider);
+        showMessage(`Welcome, ${result.user.displayName || result.user.email}!`, "success");
+      } catch (error) {
+        console.error("Sign-in error:", error);
+        
+        if (error.code === "auth/popup-closed-by-user" || error.code === "auth/cancelled-popup-request") {
+          showMessage("Sign-in was cancelled. Please try again.", "error");
+        } else if (error.code === "auth/unauthorized-domain") {
+          showMessage("Error: This domain is not authorized in Firebase Console.", "error");
+        } else {
+          showMessage(error.message || "Sign-in failed. Please try again.", "error");
+        }
+      }
+    });
+
+    // ====================== REQUEST DELETION ======================
+    document.getElementById("requestDeletion").addEventListener("click", async () => {
+      const btn = document.getElementById("requestDeletion");
+      btn.disabled = true;
+      showMessage("Processing your request...", "");
+
+      try {
+        const result = await requestDeletionFn();
+        showMessage(result.data?.message || "Account deletion has been scheduled successfully (30 days).", "success");
+      } catch (error) {
+        console.error(error);
+        showMessage(error.message || "Failed to schedule deletion.", "error");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // ====================== SIGN OUT ======================
+    document.getElementById("signOut").addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        showMessage("Signed out successfully.", "success");
+      } catch (err) {
+        console.error(err);
+        showMessage("Error signing out.", "error");
+      }
+    });
   </script>
 </head>
 <body>

@@ -17,7 +17,9 @@
   <h1>Church Requests Admin</h1>
 
   <h3>Sign In</h3>
-  <button id="googleSignInBtn" onclick="signInWithGoogle()">Sign in with Google</button>
+  <button id="googleSignInBtn" onclick="signInWithGoogle()">
+      Sign in with Google
+  </button>
   <p id="authStatus"></p>
 
   <hr>
@@ -55,12 +57,14 @@
     const auth = getAuth(app);
     
     let idToken = null;
-    let loginInProgress = false;
     
     /* =========================
        AUTH STATE LISTENER
     ========================= */
     onAuthStateChanged(auth, async (user) => {
+      let loginInProgress = false; // ✅ reset here
+      document.getElementById("googleSignInBtn").disabled = false;
+      
       console.log('Auth state:', user ? user.email : 'null');
     
       if (user) {
@@ -85,15 +89,13 @@
     /* =========================
        REDIRECT RESULT CHECK
     ========================= */
-    try {
-      const result = await getRedirectResult(auth);
-    
-      if (result?.user) {
-        console.log('Redirect success:', result.user.email);
-      }
-    } catch (err) {
-      console.error('Redirect error:', err);
-    }
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          console.log('Redirect success:', result.user.email);
+        }
+      })
+      .catch(console.error);
     
     /* =========================
        GOOGLE SIGN-IN
@@ -102,6 +104,7 @@
       if (loginInProgress) return;
 
       loginInProgress = true;
+      document.getElementById("googleSignInBtn").disabled = true;
 
       const provider = new GoogleAuthProvider();
       signInWithRedirect(auth, provider);

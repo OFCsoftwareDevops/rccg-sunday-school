@@ -11,6 +11,8 @@
     input { padding: 10px; margin: 8px 0; width: 100%; box-sizing: border-box; }
     #authStatus { color: green; font-weight: bold; }
     #googleSignInBtn { background: #4285F4; color: white; border: none; }
+    .error { color: red; }
+    .success { color: green; }
   </style>
 </head>
 <body>
@@ -20,14 +22,15 @@
   <button id="googleSignInBtn" onclick="signInWithGoogle()">
       Sign in with Google
   </button>
-  <p id="authStatus"></p>
-
+  <button onclick="signOut()">Sign Out</button>
+  
+  <p id="authStatus">Not signed in</p>
   <hr>
 
   <button onclick="listPending()">1. List Pending Requests</button>
 
   <h3>Single Request</h3>
-  <input type="text" id="reqId" placeholder="Enter Request ID (from list above)">
+  <input type="text" id="reqId" placeholder="Enter Request ID">
   <button onclick="approve()">Approve</button>
   <button onclick="reject()">Reject</button>
 
@@ -50,98 +53,105 @@
       GoogleAuthProvider,
       signInWithRedirect,
       getRedirectResult,
-      onAuthStateChanged
+      onAuthStateChanged,
+      signOut as firebaseSignOut
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     
     let idToken = null;
-    let loginInProgress = false; // ✅ FIX 1 (missing variable)
+    let loginInProgress = false;
     
-    /* =========================
-       AUTH STATE LISTENER
-    ========================= */
+    // ====================== AUTH STATE ======================
     onAuthStateChanged(auth, async (user) => {
-      
       // 🔄 ALWAYS reset UI lock
       loginInProgress = false;
       
       const btn = document.getElementById("googleSignInBtn");
       if (btn) btn.disabled = false;
       
-      console.log('Auth state:', user ? user.email : 'null');
+      console.log('Auth state changed:', user ? user.email : 'No user');
     
       if (user) {
         idToken = await user.getIdToken();
-    
-        document.getElementById('authStatus').textContent =
-          'Signed in as ' + user.email;
-    
-        document.getElementById('output').textContent =
-          'Ready! Click buttons to manage requests.';
+        document.getElementById('authStatus').innerHTML = 
+          `<span class="success">✅ Signed in as ${user.email}</span>`;
+        document.getElementById('output').textContent = 'Ready! You can now manage requests.';
       } else {
         idToken = null;
-    
-        document.getElementById('authStatus').textContent =
-          'Not signed in';
-    
-        document.getElementById('output').textContent =
-          'Sign in to continue...';
+        document.getElementById('authStatus').innerHTML = 
+          `<span class="error">Not signed in</span>`;
+        document.getElementById('output').textContent = 'Please sign in first.';
       }
     });
     
-    /* =========================
-       REDIRECT RESULT CHECK
-    ========================= */
+    // ====================== REDIRECT RESULT ======================
     getRedirectResult(auth)
       .then((result) => {
         if (result?.user) {
-          console.log('Redirect success:', result.user.email);
+          console.log('Redirect login successful:', result.user.email);
         }
       })
       .catch((error) => {
-        // 🔥 ignore harmless Firebase redirect noise errors
-        if (error.code !== "auth/cancelled-popup-request") {
-          console.error("Redirect error:", error);
+        console.error("Redirect Result Error:", error.code, error.message);
+        if (error.code !== "auth/cancelled-popup-request" && 
+            error.code !== "auth/redirect-cancelled-by-user") {
+          document.getElementById('output').textContent = 
+            `Redirect Error: ${error.message}`;
         }
       });
     
-    /* =========================
-       GOOGLE SIGN-IN
-    ========================= */
+    // ====================== SIGN IN ======================
     window.signInWithGoogle = function () {
-      
-      if (loginInProgress) return; // ✅ prevents double calls
-
+      if (loginInProgress) return;
       loginInProgress = true;
       
       // 🔒 disable button immediately
       const btn = document.getElementById("googleSignInBtn");
       if (btn) btn.disabled = true;
     
-      // 🔥 safety timeout (prevents stuck state if redirect fails)
-      setTimeout(() => {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({
+        prompt: 'select_account'   // Helps avoid some redirect issues
+      });
+
+      console.log("Starting Google Redirect Sign-in...");
+
+      signInWithRedirect(auth, provider).catch((error) => {
+        console.error("Sign-in error:", error.code, error.message);
         loginInProgress = false;
         if (btn) btn.disabled = false;
-      }, 8000);
 
-      const provider = new GoogleAuthProvider();
-      signInWithRedirect(auth, provider);
+        let msg = error.message;
+        if (error.code === "auth/unauthorized-domain") {
+          msg = "Error: This domain is not authorized. Add it in Firebase Console.";
+        } else if (error.code === "auth/popup-closed-by-user") {
+          msg = "Sign-in was cancelled.";
+        }
+        document.getElementById('output').textContent = `Sign-in failed: ${msg}`;
+      });
+    };
+
+    // ====================== SIGN OUT ======================
+    window.signOut = async function () {
+      try {
+        await firebaseSignOut(auth);
+        document.getElementById('output').textContent = "Signed out successfully.";
+      } catch (err) {
+        console.error(err);
+      }
     };
     
-    /* =========================
-       CALL CLOUD FUNCTIONS
-    ========================= */
+    // ====================== CALL CLOUD FUNCTIONS ======================
     window.callFunction = async function (endpoint, method = 'GET', body = null) {
-    
       if (!idToken) {
         alert('Please sign in first');
         return;
       }
-    
+
       const url = `https://us-central1-sundayschoolmanual-e2951.cloudfunctions.net/${endpoint}`;
-    
+
       const options = {
         method,
         headers: {
@@ -149,56 +159,41 @@
           'Content-Type': 'application/json'
         }
       };
-    
+
       if (body) options.body = JSON.stringify(body);
-    
+
       try {
         const res = await fetch(url, options);
-    
-        if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.error || `HTTP ${res.status}`);
+        const text = await res.text();
+
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
         }
-    
-        const data = await res.json();
-    
-        document.getElementById('output').textContent =
+
+        if (!res.ok) {
+          throw new Error(data.error || data.message || `HTTP ${res.status}`);
+        }
+
+        document.getElementById('output').textContent = 
           JSON.stringify(data, null, 2);
-    
       } catch (err) {
         console.error(err);
-        document.getElementById('output').textContent =
-          'Error: ' + err.message;
+        document.getElementById('output').textContent = 
+          `Error: ${err.message}`;
       }
     };
     
-    /* =========================
-       BUTTON FUNCTIONS
-    ========================= */
-    window.listPending = () =>
-      callFunction('listPending');
-    
-    window.approve = () =>
-      callFunction('approve', 'POST', {
-        id: document.getElementById('reqId').value
-      });
-    
-    window.reject = () =>
-      callFunction('reject', 'POST', {
-        id: document.getElementById('reqId').value
-      });
-    
-    window.batchApprove = () =>
-      callFunction('batchApprove', 'POST');
-    
-    window.batchReject = () =>
-      callFunction('batchReject', 'POST');
-    
-    window.cleanup = () =>
-      callFunction('cleanup', 'POST');
-    
-    window.backfill = () =>
-      callFunction('backfill', 'POST');
+    // Button functions
+    window.listPending = () => callFunction('listPending');
+    window.approve = () => callFunction('approve', 'POST', { id: document.getElementById('reqId').value });
+    window.reject = () => callFunction('reject', 'POST', { id: document.getElementById('reqId').value });
+    window.batchApprove = () => callFunction('batchApprove', 'POST');
+    window.batchReject = () => callFunction('batchReject', 'POST');
+    window.cleanup = () => callFunction('cleanup', 'POST');
+    window.backfill = () => callFunction('backfill', 'POST');
   </script>
 </body>
 </html>
